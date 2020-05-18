@@ -114,9 +114,9 @@ def get_html(url):
         'User-Agent':
         'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.79 Safari/537.36',
         'cookie':
-#        '_ga=GA1.3.838867706.1577533683; __cfduid=d76e511076637f9ef002bd80d6c7fd21e1582548059; _gid=GA1.3.109956540.1583422780; xf_session=b70d166f8c1a5780b952ed8cf20fafe4; hideRatings=N',
-        '_ga=GA1.3.838867706.1577533683; __cfduid=d76e511076637f9ef002bd80d6c7fd21e1582548059; hideRatings=N; xf_user=1284121%2C96e54c148af23da29089bba8910561a8c89b6a90; xf_session=5f3a590654e7e6f4e056fc89cbb515e6',
 #        '__cfduid=d95896e149fb4dc7048bb7dc3fc30f9861576607394; xf_user=1284121%2C96e54c148af23da29089bba8910561a8c89b6a90; xf_session=511de6204544d8a81648fcd3e16460cd',
+#        '_ga=GA1.3.307185451.1578070313; __gads=ID=c5edf6e044c40358:T=1578070314:S=ALNI_Maj2RSpH9A4RzlGRPmwtlgjrMH6Ew; __cfduid=dea7dbaa16d5a0df3a931fa0f266a20d71582845290; _gid=GA1.3.270839865.1583531993; AdvallyUserLocation=US,TX; hideRatings=N; xf_session=af65a8b3e651b61467ee202d0a4e60a1',
+        '_ga=GA1.3.838867706.1577533683; __cfduid=d76e511076637f9ef002bd80d6c7fd21e1582548059; hideRatings=N; xf_user=1284121%2C96e54c148af23da29089bba8910561a8c89b6a90; xf_session=5f3a590654e7e6f4e056fc89cbb515e6',
         'authority': 
         'www.beeradvocate.com'
 #        'ContentType':

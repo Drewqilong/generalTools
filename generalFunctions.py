@@ -155,5 +155,16 @@ def removeMongo(query,database,collection):
     if not query:
         collection.delete_many({})
 
+def tranferMongo():
+    from pymongo import MongoClient
+    client = MongoClient("mongodb+srv://dbuser:8fO56qa3wBdNYtsk@cluster0-bhgly.mongodb.net/rateBeer?retryWrites=true&w=majority")
+    db = client.rateBeer
+    collection = db['beers']
+    data = collection.find()
+    client_local = MongoClient()
+    db_local = client_local.rateBeer
+    coll_local = db_local['beers']
+    coll_local.insert(data)
+
 if __name__ == "__main__":  
     print(generatePassword(15))

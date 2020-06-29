@@ -59,10 +59,10 @@ def combineCSV(path):
     
 
 '''Request url'''    
-def get_general_html(url,cookie=None):
+def get_general_html(url,cookie=None, returnJson=None):
     import requests
-    import browsercookie
-    import browser_cookie3
+#    import browsercookie
+#    import browser_cookie3
     from requests.auth import HTTPBasicAuth
     
     '''
@@ -95,12 +95,16 @@ def get_general_html(url,cookie=None):
         session_requests = requests.session()
 #        cookie_obj = requests.cookies.create_cookie(domain='www.ratebeer.com',name='COOKIE_NAME',value='the cookie works')
 #        session_requests.cookies.set_cookie(cookie_obj)
-        cookies = browser_cookie3.firefox(domain_name='.ratebeer.com')
+#        cookies = browser_cookie3.firefox(domain_name='.ratebeer.com')
 #        cookie = {'version':'0', name='_gid', value='GA1.2.1596360130.1584462568', port=None, port_specified=False, domain='.ratebeer.com', domain_specified=True, domain_initial_dot=True, path='/', path_specified=True, secure=0, expires=1584548968, discard=False, comment=None, comment_url=None, rest={}, rfc2109=False}
-        htmlcontet = session_requests.get(url, cookies = cookies, headers=headers,  timeout=30)   # auth = HTTPBasicAuth('Jerryzzz','URduI79Ck%iqDcx'),
-        htmlcontet.raise_for_status()
-        htmlcontet.encoding = 'utf-8'
-        return htmlcontet.text
+#        htmlcontet = session_requests.get(url, cookies = cookies, headers=headers,  timeout=30)   # auth = HTTPBasicAuth('Jerryzzz','URduI79Ck%iqDcx'),
+        htmlcontent = session_requests.get(url, headers=headers,  timeout=30)
+        if returnJson == True:
+            return htmlcontent.json()
+        else:
+            htmlcontent.raise_for_status()
+            htmlcontent.encoding = 'utf-8'
+            return htmlcontent.text
     except:
         return " Request Failure "
     

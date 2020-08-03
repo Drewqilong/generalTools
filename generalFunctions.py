@@ -105,7 +105,8 @@ def get_general_html(url,cookie=None, returnJson=None):
             htmlcontent.raise_for_status()
             htmlcontent.encoding = 'utf-8'
             return htmlcontent.text
-    except:
+    except Exception as e:
+        print(str(e))
         return " Request Failure "
     
 '''Request url, only for beeradvocate with session ID'''    

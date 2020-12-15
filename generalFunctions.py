@@ -24,7 +24,7 @@ def exportExcel(goods_table):
         exportexcel.write_excel(goods_table, 'demo.xls')
         print('download data success!')
     
-def exportCSV(data,filename,filePath='',mode='w',header=True):
+def exportCSV(data,filename,filePath='',mode='w',header=True,colName=''):
     
     l_file = filename
     from os import path,makedirs
@@ -32,7 +32,13 @@ def exportCSV(data,filename,filePath='',mode='w',header=True):
         if not path.exists(filePath):
             makedirs(filePath)
         l_file = path.join(filePath,filename)
-    df_data = pd.DataFrame(data)
+    if type(data)=='pandas.core.frame.DataFrame':
+        df_data = data
+    else:
+        if colName:
+            df_data=pd.DataFrame(data,columns=colName)
+        else:
+            df_data = pd.DataFrame(data)
     df_data.to_csv(l_file,index=False, encoding='utf-8-sig',mode=mode,header=header)
     
 def combineCSV(path):

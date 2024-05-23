@@ -5,11 +5,19 @@ Created on Tue Nov 19 14:46:10 2019
 @author: Jerry
 """
 import pandas as pd
-from pymongo import MongoClient
+
 
 #def exportCSV(data):
 #    submit = pd.DataFrame(data)
 #    submit.to_csv('submission.csv',index=False)
+    
+'''This function cannot extract San Diego'''
+def ExtractCity(address):
+    from geotext import GeoText
+    places = GeoText(address)
+    return places.cities
+
+
     
 def generatePassword(length):
     import secrets
@@ -63,8 +71,37 @@ def combineCSV(path):
     '''encoding = ‘utf-8-sig’ is added to overcome the issue when exporting ‘Non-English’ languages.'''
     combined_csv.to_csv( "combined_csv.csv", index=False, encoding='utf-8-sig')
     
+def get_time(timestamp=None):
+    from datetime import datetime
+    import time
 
-'''Request url'''    
+    if not timestamp:
+        timestamp=time.time()
+    # convert to datetime
+    date_time = datetime.fromtimestamp(timestamp)
+    
+    # convert timestamp to string in dd-mm-yyyy HH:MM:SS
+    str_date_time = date_time.strftime("%Y%m%d_%H%M%S")
+    # str_date_time = date_time.strftime("%d-%m-%Y, %H:%M:%S")
+    # print("Result 1:", str_date_time)
+    
+    # # convert timestamp to string in dd month_name, yyyy format
+    # str_date = date_time.strftime("%d %B, %Y")
+    # print("Result 2:", str_date)
+    
+    # # convert timestamp in HH:AM/PM MM:SS
+    # str_time = date_time.strftime("%I%p %M:%S")
+    # print("Result 3:", str_time)
+    return str_date_time
+
+
+def get_date():
+    from datetime import date
+
+    today = date.today()
+    return today.strftime("%Y%m%d")
+    
+    '''Request url'''    
 def get_general_html(url,cookie=None, returnJson=None):
     import requests
 #    import browsercookie
@@ -148,14 +185,26 @@ def get_html(url):
     except:
         return " Request Failure "
     
-def insertMongo(data,database,collection):
+def get_html_urllib(url,cookie,authority):
+    import urllib
+    req = urllib.request.Request(url)
+    req.add_header('User-Agent','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36')
+    req.add_header('cookie',cookie)
+    req.add_header('authority',authority)
+    req.add_header('Accept','text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7')
+    r = urllib.request.urlopen(req).read().decode('utf-8')
+    return r
     
+    
+def insertMongo(data,database,collection):
+    from pymongo import MongoClient
     client = MongoClient()
     db = client[database]
     collection = db[collection]
     collection.insert_many(data)
 
 def removeMongo(query,database,collection):
+    from pymongo import MongoClient
     client = MongoClient()
     db = client[database]
     collection = db[collection]
@@ -172,6 +221,68 @@ def tranferMongo():
     db_local = client_local.rateBeer
     coll_local = db_local['beers']
     coll_local.insert(data)
+    
+def getCensus(state='06'):
+    import requests
+    filename = 'C:/Users/qzhu/TAMU_Google Drive/Research/CraftBeer/Term Paper/DataSet/Census Data/'+'California_county_1991-2000_pop.csv'
+    df_pop1 = pd.read_csv(filename,thousands=',')
+    df_pop1.drop(['2000'],axis=1,inplace=True)
+    # df_pop1.set_index("County", inplace = True)
+    filename = 'C:/Users/qzhu/TAMU_Google Drive/Research/CraftBeer/Term Paper/DataSet/Census Data/'+'California_county_2000-2010_pop.csv'
+    df_pop2 = pd.read_csv(filename,thousands=',')
+    # df_pop2.set_index("County", inplace = True)
+    df_county_year_pop = df_pop1.merge(df_pop2, left_on=['County'],right_on=['County'], how="outer")
+    df_county_year_pop.rename(columns={'2000_y':'2000'},inplace=True)
+    df_county_year_pop.drop(['2009','2010'],axis=1,inplace=True)
+    df_county_year_pop['NAME']=df_county_year_pop['County']+', California'
+    '''PEP data'''
+    dsource='dec' # the survey i.e. decennial census, acs, etc
+    dseries='pl' # a dataset within the survey
+    cols='NAME,P1_001N' # census variables - total population
+    
+    '''ACS data'''
+    dsource='acs' # the survey i.e. decennial census, acs, etc
+    dseries='acs5' # a dataset within the survey
+    cols='NAME,B01001_001E' # census variables - total population
+    
+    # state='06' #'44' # ansi fips codes for states; use asterisk * for all states
+    place= '*' #'19180,54640,59000,74300' # ansi fips codes cities / towns; use asterisk * for all places
+    county = '*'
+    outfile='census_pop2020.csv'
+    # keyfile='census_key.txt'
 
+    # with open(keyfile) as key:
+    # 	api_key=key.read().strip()
+    api_key = 'e76b3223547faa2bf0198c7abd52dd572f4da9bd'
+
+    # for sub-geography within larger geography - geographies must nest
+    # data_url = f'{base_url}?get={cols}&for=place:{place}&in=state:{state}&key={api_key}'
+    for i in range(2009,2021):
+        year= str(i)
+        base_url = f'https://api.census.gov/data/{year}/{dsource}/{dseries}'
+        data_url = f'{base_url}?get={cols}&for=county:{county}&in=state:{state}&key={api_key}'
+        # print(data_url)
+        response=requests.get(data_url).json()
+        df_census =  pd.DataFrame(response[1:],columns =[response[0][0],year,'state','county']) #'NAME','P1_001N','state','county'
+        # df_census.rename({response[0][1]:year},inplace=True)
+        df_census.drop(['state','county'],axis=1,inplace=True)
+        df_county_year_pop = df_county_year_pop.merge(df_census, left_on=['NAME'],right_on=['NAME'], how="outer")
+    return df_county_year_pop
+
+def getCounty(city, state):
+    import uszipcode
+    from uszipcode import SearchEngine
+    
+    search = SearchEngine()
+    try:
+        zip_info = search.by_city_and_state(city, state)
+        
+        if zip_info:
+            return zip_info[0].county
+    except Exception as e:
+        print(city,state)
+        return ''
+    return ''
 if __name__ == "__main__":  
     print(generatePassword(15))
+    # print(getCensus())
